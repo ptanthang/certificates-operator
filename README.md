@@ -44,8 +44,8 @@ nginx listens on `localhost:8002` (HTTPS) using
 private key. Since the root CA isn't trusted by your system, verify with:
 
 ```bash
-curl --cacert root/ca/certs/ca.cert.pem https://staging.nature-life.com:8002/ \
-  --resolve staging.nature-life.com:8002:127.0.0.1
+curl --cacert root/ca/certs/ca.cert.pem https://nature-life.com:8002/ \
+  --resolve nature-life.com:8002:127.0.0.1
 ```
 
 ## Inspecting certs
