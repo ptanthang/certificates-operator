@@ -1,0 +1,12 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: nature-life-nginx
+    restart: unless-stopped
+    ports:
+      - "8001:80"
+      - "8002:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./root/ca/intermediate/certs/nature-life.com.fullchain.pem:/etc/nginx/certs/fullchain.pem:ro
+      - ./root/ca/intermediate/private/nature-life.com.key.pem:/etc/nginx/certs/privkey.pem:ro

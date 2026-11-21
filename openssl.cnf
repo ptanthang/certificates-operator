@@ -1,0 +1,66 @@
+# Shared CA config. Root and intermediate reuse this via $ENV::CA_DIR.
+
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+dir               = $ENV::CA_DIR
+certs             = $dir/certs
+new_certs_dir     = $dir/newcerts
+database          = $dir/index.txt
+serial            = $dir/serial
+private_key       = $dir/private/ca.key.pem
+certificate       = $dir/certs/ca.cert.pem
+default_md        = sha256
+default_days      = 375
+policy            = policy_strict
+preserve          = no
+
+[ policy_strict ]
+countryName             = match
+stateOrProvinceName     = match
+organizationName        = match
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ policy_loose ]
+countryName             = optional
+stateOrProvinceName     = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ req ]
+default_bits        = 2048
+default_md          = sha256
+distinguished_name  = req_dn
+string_mask         = utf8only
+prompt              = no
+
+[ req_dn ]
+C  = GB
+ST = England
+O  = Alice Ltd
+CN = placeholder
+
+[ v3_ca ]
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints       = critical, CA:true
+keyUsage               = critical, digitalSignature, cRLSign, keyCertSign
+
+[ v3_intermediate_ca ]
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints       = critical, CA:true, pathlen:0
+keyUsage               = critical, digitalSignature, cRLSign, keyCertSign
+
+[ server_cert ]
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid,issuer:always
+basicConstraints       = critical, CA:false
+keyUsage               = critical, digitalSignature, keyEncipherment
+extendedKeyUsage       = serverAuth
+subjectAltName         = $ENV::SAN
