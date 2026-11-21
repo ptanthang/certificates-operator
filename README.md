@@ -7,11 +7,11 @@ serve it over TLS with nginx via Docker Compose.
 ## Layout
 
 - `simple-operator.sh` — builds the full chain: root CA → intermediate CA →
-  leaf cert (`nature-life.com`), then verifies and inspects each cert. The
-  root and intermediate keys are AES-256 encrypted, so `openssl genrsa` will
-  prompt for a passphrase the first time each is created — see
-  `passwords.txt` for the demo values. Generated material is written to
-  `root/` (gitignored).
+  leaf cert (SANs `nature-life.com` and `www.nature-life.com`), then verifies
+  and inspects each cert. The root and intermediate keys are AES-256
+  encrypted, so `openssl genrsa` will prompt for a passphrase the first time
+  each is created — see `passwords.txt` for the demo values. Generated
+  material is written to `root/` (gitignored).
 - `openssl.cnf` — shared CA config used by both root and intermediate
   (`CA_DIR` env var selects which directory each `openssl` invocation acts
   on). Defines `policy_strict` (root → intermediate) and `policy_loose`
@@ -46,6 +46,8 @@ private key. Since the root CA isn't trusted by your system, verify with:
 ```bash
 curl --cacert root/ca/certs/ca.cert.pem https://nature-life.com:8002/ \
   --resolve nature-life.com:8002:127.0.0.1
+curl --cacert root/ca/certs/ca.cert.pem https://www.nature-life.com:8002/ \
+  --resolve www.nature-life.com:8002:127.0.0.1
 ```
 
 ## Inspecting certs

@@ -20,7 +20,8 @@ set -euo pipefail
 CONF="./openssl.cnf"
 ROOT_DIR="./root/ca"
 INTERMEDIATE_DIR="$ROOT_DIR/intermediate"
-LEAF_NAME="nature-life.com"
+LEAF_SANS=("nature-life.com" "www.nature-life.com")
+LEAF_NAME="${LEAF_SANS[0]}"
 
 ROOT_SUBJ="/C=VN/ST=Vietname/O=Nature Life Ltd/CN=Nature Life Ltd Root CA"
 INT_SUBJ="/C=VN/ST=Vietname/O=Nature Life Ltd/CN=Nature Life Ltd Intermediate CA"
@@ -149,13 +150,17 @@ create_leaf() {
   local csr=$INTERMEDIATE_DIR/csr/$name.csr.pem
   local crt=$INTERMEDIATE_DIR/certs/$name.cert.pem
 
+  local san
+  san=$(printf 'DNS:%s,' "${LEAF_SANS[@]}")
+  san=${san%,}
+
   gen_private_key "$key" 2048
 
   if [[ -f $csr ]]; then
     log WARN "leaf CSR exists, skipping"
   else
     log INFO "Generating leaf CSR"
-    CA_DIR="$INTERMEDIATE_DIR" SAN="DNS:$name" openssl req -config "$CONF" -new -sha256 \
+    CA_DIR="$INTERMEDIATE_DIR" SAN="$san" openssl req -config "$CONF" -new -sha256 \
       -key "$key" -subj "$LEAF_SUBJ" -out "$csr"
   fi
 
@@ -163,7 +168,7 @@ create_leaf() {
     log WARN "leaf cert exists, skipping"
   else
     log INFO "Signing leaf with intermediate (policy_loose)"
-    CA_DIR="$INTERMEDIATE_DIR" SAN="DNS:$name" sign_cert "leaf-$name" "$CONF" -batch \
+    CA_DIR="$INTERMEDIATE_DIR" SAN="$san" sign_cert "leaf-$name" "$CONF" -batch \
       -policy policy_loose \
       -extensions server_cert -days 375 -notext -md sha256 \
       -in "$csr" -out "$crt"
